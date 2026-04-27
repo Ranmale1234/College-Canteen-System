@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>College Canteen Ordering</title>
+    <link rel="icon" href="https://ui-avatars.com/api/?name=Campus+Cravings&background=2563eb&color=fff&rounded=true&bold=true&size=128" type="image/png">
+    <meta name="description" content="Order food online from your college canteen">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="./customer.css" />
+  </head>
+  <body class="customer-app">
+    <!-- Navbar -->
+    <header class="customer-navbar">
+      <div class="logo" id="homeLogo" style="cursor: pointer;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+        <span>CampusCravings</span>
+      </div>
+      
+      <div class="search-bar customer-search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" placeholder="Search for food..." id="searchInput" />
+      </div>
+
+      <div class="nav-actions">
+        <!-- Guest State -->
+        <button id="navLoginBtn" class="btn btn-outline" style="display: none;">Login / Sign Up</button>
+        
+        <!-- Logged In State -->
+        <div id="navProfile" class="user-profile dropdown-container" style="display: none;">
+          <span id="userNameDisplay" class="user-name"></span>
+          <img src="https://ui-avatars.com/api/?name=User&background=0f172a&color=fff" alt="User Profile" class="avatar" id="userAvatar" />
+          <div class="dropdown-menu">
+            <a href="#" id="viewOrdersBtn">Order History</a>
+            <a href="#" id="logoutBtn" class="text-danger">Logout</a>
+          </div>
+        </div>
+        
+        <!-- Cart -->
+        <button class="cart-btn" id="cartBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+          <span class="cart-badge" id="cartBadge">0</span>
+          <span>Cart</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="customer-main" id="mainContentView">
+      <div class="categories-wrapper">
+        <h2 id="mindHeading">What's on your mind?</h2>
+        <div class="categories-row" id="categoriesRow">
+          <div class="category-item active" data-cat="All">All</div>
+          <div class="category-item" data-cat="Breakfast">Breakfast</div>
+          <div class="category-item" data-cat="Lunch">Lunch</div>
+          <div class="category-item" data-cat="Snacks">Snacks</div>
+          <div class="category-item" data-cat="Drinks">Drinks</div>
+        </div>
+      </div>
+
+      <div class="menu-section">
+        <h2>Recommended for you</h2>
+        <div class="customer-menu-grid" id="customerMenuGrid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </main>
+
+    <!-- Order History View -->
+    <main class="customer-main" id="orderHistoryView" style="display: none;">
+      <div class="view-header">
+        <h2>Your Order History</h2>
+        <button class="btn btn-outline" id="backToMenuBtn">Back to Menu</button>
+      </div>
+      <div id="orderHistoryList" class="order-history-list">
+        <!-- Populated by JS -->
+      </div>
+    </main>
+
+    <!-- Cart Sidebar -->
+    <div class="cart-sidebar-overlay" id="cartSidebarOverlay"></div>
+    <div class="cart-sidebar" id="cartSidebar">
+      <div class="cart-header">
+        <h2>Your Cart</h2>
+        <button class="close-btn static" id="closeCartBtn">&times;</button>
+      </div>
+      <div class="cart-items" id="cartItemsContainer">
+        <!-- Populated by JS -->
+      </div>
+      <div class="cart-footer">
+        <div class="cart-total">
+          <span>Total:</span>
+          <span id="cartTotalPrice">₹0</span>
+        </div>
+        <button class="btn btn-primary full-width" id="checkoutBtn">Proceed to Checkout</button>
+      </div>
+    </div>
+
+    <!-- Modals -->
+
+    <!-- Welcome Modal (Opaque background so they can't see the app) -->
+    <div class="modal-overlay" id="welcomeModal">
+      <div class="modal-content text-center">
+        <h2>Welcome to CampusCravings!</h2>
+        <p class="mb-4">Order delicious food straight from the college canteen.</p>
+        <button class="btn btn-primary full-width mb-3" id="welcomeLoginBtn">Login / Register</button>
+        <button class="btn btn-outline full-width" id="continueGuestBtn">Continue as Guest</button>
+      </div>
+    </div>
+
+    <!-- Auth Modal (Opaque background) -->
+    <div class="modal-overlay" id="authModal">
+      <div class="modal-content auth-modal">
+        <button class="close-btn" id="closeAuthModal">&times;</button>
+        
+        <!-- Login Form -->
+        <div id="loginFormContainer" class="auth-form-container">
+          <h2>Login</h2>
+          <p class="text-secondary mb-4">Enter your details to continue ordering</p>
+          <form id="loginForm">
+            <div class="form-group">
+              <input type="text" id="loginName" placeholder="Full Name (e.g. Sonu Kumar)" required />
+            </div>
+            <div class="form-group">
+              <input type="text" id="loginEmail" placeholder="College Email or Roll Number" required />
+            </div>
+            <div class="form-group">
+              <input type="password" id="loginPassword" placeholder="Password" required />
+            </div>
+            <button type="submit" class="btn btn-primary full-width mt-2">Login</button>
+          </form>
+          <p class="mt-4 text-center">
+            New user? <a href="#" id="showRegisterLink">Create an account</a>
+          </p>
+        </div>
+
+        <!-- Register Form -->
+        <div id="registerFormContainer" class="auth-form-container" style="display: none;">
+          <h2>Register</h2>
+          <p class="text-secondary mb-4">Create an account to place orders</p>
+          <form id="registerForm">
+            <div class="form-group">
+              <input type="text" id="regName" placeholder="Full Name" required />
+            </div>
+            <div class="form-group">
+              <input type="text" id="regEmail" placeholder="College Email or Roll Number" required />
+            </div>
+            <div class="form-group">
+              <input type="password" id="regPassword" placeholder="Password" required />
+            </div>
+            <button type="submit" class="btn btn-primary full-width mt-2">Register</button>
+          </form>
+          <p class="mt-4 text-center">
+            Already have an account? <a href="#" id="showLoginLink">Login</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div class="modal-overlay" id="checkoutModal">
+      <div class="modal-content">
+        <button class="close-btn" id="closeCheckoutModal">&times;</button>
+        <h2>Checkout</h2>
+        
+        <div id="checkoutStep1">
+          <p class="mb-4">How would you like your order?</p>
+          <div class="schedule-options mb-4">
+            <label class="radio-label">
+              <input type="radio" name="schedule" value="now" checked> Order Now
+            </label>
+            <label class="radio-label mt-2">
+              <input type="radio" name="schedule" value="lunch"> Schedule Before Lunch
+            </label>
+          </div>
+          <div class="cart-total mb-4" style="display: flex; justify-content: space-between; font-weight:bold; font-size:1.1rem; border-top:1px solid #e2e8f0; padding-top:1rem;">
+            <span>Amount to Pay:</span>
+            <span id="checkoutAmount">₹0</span>
+          </div>
+          <button class="btn btn-primary full-width" id="proceedToPayBtn">Proceed to Payment</button>
+        </div>
+
+        <div id="checkoutStep2" style="display: none;" class="text-center">
+          <p class="mb-3">Scan QR to Pay</p>
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=canteenpayment" alt="QR Code" class="qr-code mb-4" />
+          <button class="btn btn-success full-width" id="iHavePaidBtn">I Have Paid</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tracking Modal -->
+    <div class="modal-overlay" id="trackingModal">
+      <div class="modal-content text-center">
+        <button class="close-btn" id="closeTrackingModal">&times;</button>
+        <h2>Order Tracking</h2>
+        <p class="text-secondary mb-2">Order ID: <strong id="trackOrderId">#12345</strong></p>
+        <p class="mb-4">Time Remaining: <strong id="orderCountdownTimer" style="color: var(--danger-color); font-size: 1.2rem;">15:00</strong></p>
+        
+        <div class="tracking-timeline">
+          <div class="track-step active" id="step1">
+            <div class="track-icon">✓</div>
+            <span>Placed</span>
+          </div>
+          <div class="track-line" id="line1"></div>
+          <div class="track-step" id="step2">
+            <div class="track-icon">♨</div>
+            <span>Preparing</span>
+          </div>
+          <div class="track-line" id="line2"></div>
+          <div class="track-step" id="step3">
+            <div class="track-icon">🛍️</div>
+            <span>Ready</span>
+          </div>
+          <div class="track-line" id="line3"></div>
+          <div class="track-step" id="step4">
+            <div class="track-icon">★</div>
+            <span>Completed</span>
+          </div>
+        </div>
+        
+        <p class="mt-4 text-primary" id="trackStatusText" style="font-weight: 600;">Your order has been placed!</p>
+      </div>
+    </div>
+
+    <!-- Pre-order closed overlay -->
+    <div class="modal-overlay" id="closedOverlay" style="z-index: 2000; background-color: rgba(255,255,255,0.95);">
+      <div class="text-center">
+        <h1 class="text-danger" style="font-size: 3rem; margin-bottom: 1rem;">Pre-order Closed</h1>
+        <p style="font-size: 1.2rem; font-weight: 500;">The canteen is no longer accepting orders.</p>
+      </div>
+    </div>
+
+    <!-- Restricted Action Toast -->
+    <div class="toast" id="toastMessage">Message</div>
+
+    <script src="./customer.js"></script>
+  </body>
+</html>
